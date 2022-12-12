@@ -7,70 +7,202 @@ import kotlin.collections.ArrayList
 import kotlin.math.pow
 
 fun main(args: Array<String>) {
-    val inputStream: InputStream = File("inputs/input10.txt").inputStream()
+    val inputStream: InputStream = File("inputs/input11.txt").inputStream()
 
-    val inputList = ArrayList<String>()
+    val inputList = mutableListOf<String>()
 
 
     inputStream.bufferedReader().forEachLine {
         inputList.add(it)
     }
-    //ZKJFBJFZ
 
-    println("answer ${part102(inputList)}")
+    println("answer ${part112(inputList)}")
+
 
 }
-fun part102(inputList: java.util.ArrayList<String>): Int {
-    val indexes = listOf(40, 80, 120, 160, 200, 240)
-    var x = 1
-    var sum = 0
-    var list = mutableListOf<String>()
-    var sprite = Sprite()
-    var lines = mutableListOf<MutableList<String>>()
-    1.rangeTo(indexes.size).forEach{
-        lines.add(mutableListOf())
+
+fun part112(inputList: MutableList<String>): Long {
+    val monkeyMover = MonkeyMover(buildMonkeys(inputList))
+    monkeyMover.move(10000)
+    return monkeyMover.getScore()
+}
+
+
+fun part111(inputList: MutableList<String>): Long {
+    val monkeyMover = MonkeyMover(buildMonkeys(inputList))
+    monkeyMover.move(20)
+    return monkeyMover.getScore()
+}
+
+class MonkeyMover(
+    private val monkeys: List<Monkey>,
+    private val BUZY: Long = 3L
+) {
+
+    private val score = monkeys.associate { it.id to 0 }.toMutableMap()
+    private val productOfDivisors = monkeys
+        .map { it.test!! }
+        .reduce{ acc, div -> acc * div }
+
+    fun printScore() {
+        println(score)
     }
 
+    fun move(n: Int) {
+        repeat(n) {
+            monkeys.forEach { calc(it) }
+            //  println (score)
+        }
+        //println (score)
+    }
 
+    fun getScore(): Long {
+        val list = score.values.map { it }.sortedDescending()
+        return list[0].toLong() * list[1].toLong()
+    }
 
-    inputList.forEachIndexed { i, command ->
-        if (command.startsWith("addx")) {
-            val (_, value) = command.split(" ")
-            list.add("addx")
-            list.add(value)
+    private fun calcScore(monkey: Monkey) {
+        score[monkey.id] = score[monkey.id]?.plus(monkey.items.size) ?: 0
+    }
+
+    private fun calc(monkey: Monkey) {
+        calcScore(monkey)
+        monkey.items.forEach {
+            val value = calcItem(monkey, it)
+            val index = getIndex(monkey, value)
+            monkeys[index].items.addLast(value)
+        }
+        monkey.items = LinkedList()
+    }
+
+    private fun calcItem(monkey: Monkey, value: Long): Long {
+        val (operation, op) = monkey.command!!.split(" ")
+        val x = if (op == "old") value else op.toLong()
+        return if (operation == "*") {
+            (value * x) % productOfDivisors
         } else {
-            list.add("noop")
+            (value + x) % productOfDivisors
         }
     }
 
-    list.forEachIndexed{ i, value ->
+    private fun getIndex(monkey: Monkey, value: Long) =
+        if (value % monkey.test!! == 0L) {
+            monkey.idxTrue!!
+        } else {
+            monkey.IdxFalse!!
+        }
+}
+
+fun buildMonkeys(inputList: MutableList<String>): List<Monkey> {
+    var monkey: Monkey? = null
+    var monkeys = mutableListOf<Monkey>()
+    var idx = -1
+    inputList.forEach { op ->
+        if (op.startsWith("Monkey")) {
+            idx += 1
+            monkey = Monkey(idx)
+            monkeys.add(monkey!!)
+        }
+        if (op.startsWith("  Starting items:")) {
+            val values = op.split(" ")
+            values.subList(4, values.size).map { it.toInt() }.forEach {
+                monkey!!.items.add(it.toLong())
+            }
+        }
+        if (op.startsWith("  Operation:")) {
+            val values = op.split(" ")
+            monkey!!.command = values.subList(values.size - 2, values.size).joinToString(" ")
+        }
+        if (op.startsWith("  Test: divisible")) {
+            val values = op.split(" ")
+            monkey!!.test = values.last().toLong()
+        }
+        if (op.startsWith("    If true:")) {
+            val values = op.split(" ")
+            monkey!!.idxTrue = values.last().toInt()
+        }
+        if (op.startsWith("    If false:")) {
+            val values = op.split(" ")
+            monkey!!.IdxFalse = values.last().toInt()
+        }
+    }
+    return monkeys
+}
+
+data class Monkey(
+    val id: Int,
+    var items: LinkedList<Long> = LinkedList(),
+    var command: String? = null,
+    var test: Long? = null,
+    var idxTrue: Int? = null,
+    var IdxFalse: Int? = null,
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as Monkey
+
+        if (id != other.id) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        return id
+    }
+}
+
+fun part102(inputList: List<String>): Int {
+    var x = 1
+    val list = getList(inputList)
+    var sprite = Sprite()
+
+    val lines = List(6) { mutableListOf<String>() }
+
+
+    list.forEachIndexed { i, value ->
         val idxLines = i.div(40)
         val idx = i % 40
 
-        if (sprite.position.contains(idx)){
-            lines[idxLines].add("X")
+        if (sprite.position.contains(idx)) {
+            lines[idxLines].add("@")
         } else {
-            lines[idxLines].add(".")
+            lines[idxLines].add(" ")
         }
 
-        if (!value.startsWith("addx") && !value.startsWith("noop")){
+        if (!value.startsWith("addx") && !value.startsWith("noop")) {
             x += value.toInt()
-            sprite = Sprite(setOf(x-1, x, x+1) )
+            sprite = Sprite(setOf(x - 1, x, x + 1))
         }
     }
-    lines.forEach { lines -> println(lines) }
+    lines.forEach { l -> println(l.joinToString(" ")) }
     return 0
 }
 
 data class Sprite(
-    val position : Set<Int> = setOf(0, 1, 2)
+    val position: Set<Int> = setOf(0, 1, 2)
 )
 
-fun part101(inputList: java.util.ArrayList<String>): Int {
+fun part101(inputList: List<String>): Int {
     val index = listOf(20, 60, 100, 140, 180, 220)
     var x = 1
     var sum = 0
-    var list = mutableListOf<String>()
+    val list = getList(inputList)
+
+    list.forEachIndexed { i, value ->
+        if (index.contains(i + 1)) {
+            sum += (i + 1) * x
+        }
+        if (!value.startsWith("addx") && !value.startsWith("noop")) {
+            x += value.toInt()
+        }
+    }
+    return sum
+}
+
+fun getList(inputList: List<String>): List<String> {
+    val list = mutableListOf<String>()
 
     inputList.forEachIndexed { i, command ->
         if (command.startsWith("addx")) {
@@ -80,17 +212,9 @@ fun part101(inputList: java.util.ArrayList<String>): Int {
         } else {
             list.add("noop")
         }
-   }
-
-    list.forEachIndexed{ i, value ->
-        if (index.contains(i + 1)){
-            sum += (i + 1)*x
-        }
-        if (!value.startsWith("addx") && !value.startsWith("noop")){
-            x += value.toInt()
-        }
     }
-   return sum
+
+    return list
 }
 
 //println("answer ${part91(inputList) == 5878}")
