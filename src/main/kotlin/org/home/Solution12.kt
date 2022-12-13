@@ -17,6 +17,96 @@ fun solution12() {
     println("   part 2 answer ${part2(inputList)} time = ${now().toEpochMilli() - time} ") //354
 }
 
+class CalcWay(
+    private val area: Area,
+    private val starts: List<Point>,
+    private val end: Point
+) {
+
+    private var minWay: Way? = null
+    private var calcPoint = mutableMapOf<Point, Int>()
+
+    fun calc(): Int {
+//       val compareByLength: Comparator<Way> = compareBy { distance(it.point, end ) + it.path.size }
+//        val ways = PriorityQueue(compareByLength)
+        val ways = LinkedList<Way>()
+        ways.addAll(starts.map { Way(it, mutableSetOf(it)) })
+
+        while (ways.size > 0) {
+            val way = ways.pollFirst()
+
+            if (way.point == end) {
+                if (minWay == null || way.path.size < minWay!!.path.size) {
+                    minWay = way
+                }
+            } else {
+                ways.addAll(getNext(way))
+            }
+        }
+        return min()
+    }
+
+    private fun getNext(way: Way): Collection<Way> =
+        area.getNeighbours(way.point.x, way.point.y)
+            .asSequence()
+            .filter { it.height - way.point.height < 2 }
+            .filter { !way.path.contains(it) }
+            .map { p ->
+                val path = way.path.toMutableSet()
+                path.add(p)
+                Way(p, path)
+            }
+            .filter { checkPoint(it.point, it.path.size) }
+            .toList()
+
+    private fun checkPoint(point: Point, path: Int): Boolean {
+        val size = calcPoint[point] ?: Int.MAX_VALUE
+        if (size > path) {
+            calcPoint[point] = path
+            return true
+        }
+        return false
+    }
+
+    private fun distance(point1: Point, point2: Point): Int =
+        ((point1.x - point2.x).toDouble().pow(2) + (point1.y - point2.y).toDouble().pow(2)).pow(0.5).toInt()
+
+    private fun min(): Int = (minWay?.path?.size ?: Int.MAX_VALUE) - 1
+}
+
+
+class Area(
+    private val map: List<List<Point>>
+) {
+    fun getNeighbours(x: Int, y: Int): List<Point> {
+        val points = mutableListOf<Point>()
+        if (x > 0) {
+            points.add(map[y][x - 1])
+        }
+        if (x < map[0].size - 1) {
+            points.add(map[y][x + 1])
+        }
+        if (y > 0) {
+            points.add(map[y - 1][x])
+        }
+        if (y < map.size - 1) {
+            points.add(map[y + 1][x])
+        }
+        return points
+    }
+}
+
+data class Way(
+    val point: Point,
+    val path: MutableSet<Point>,
+)
+
+data class Point(
+    val x: Int,
+    val y: Int,
+    val height: Int
+)
+
 private fun part1(inputList: List<String>): Int {
     val dict = getDict()
     val area = parseInput(inputList, dict)
@@ -67,92 +157,3 @@ private fun getDict(): Map<Char, Int> {
 
     return dict
 }
-
-
-class CalcWay(
-    private val area: Area,
-    private val starts: List<Point>,
-    private val end: Point
-) {
-
-    private var minWay: Way? = null
-    private var calcPoint = mutableMapOf<Point, Int>()
-
-    fun calc(): Int {
-        val compareByLength: Comparator<Way> = compareBy { it.steps.size }
-        val ways = PriorityQueue(compareByLength)
-        ways.addAll(starts.map { Way(it, mutableSetOf(it)) })
-
-        while (ways.size > 0) {
-            //print(ways.size)
-            val way = ways.remove()
-
-            if (way.point == end) {
-                if (minWay == null || way.steps.size < minWay!!.steps.size) {
-                    minWay = way
-                }
-            } else {
-                ways.addAll(getNext(way))
-            }
-        }
-        return min() - 1
-
-    }
-
-    private fun min(): Int = minWay?.steps?.size ?: Int.MAX_VALUE
-
-    private fun getNext(way: Way): Collection<Way> =
-        area.getNeighbours(way.point.x, way.point.y)
-            .asSequence()
-            .filter { it.height - way.point.height < 2 }
-            .filter { !way.steps.contains(it) }
-            .map { p ->
-                val steps = way.steps.toMutableSet()
-                steps.add(p)
-                Way(p, steps)
-            }
-            .filter { checkPoint(it.point, it.steps.size) }
-            .toList()
-
-    private fun checkPoint(point: Point, path: Int): Boolean {
-        val size = calcPoint[point] ?: Int.MAX_VALUE
-        if (size > path) {
-            calcPoint[point] = path
-            return true
-        }
-        return false
-    }
-}
-
-
-class Area(
-    private val map: List<List<Point>>
-) {
-    fun getNeighbours(x: Int, y: Int): List<Point> {
-        val points = mutableListOf<Point>()
-        if (x > 0) {
-            points.add(map[y][x - 1])
-        }
-        if (x < map[0].size - 1) {
-            points.add(map[y][x + 1])
-        }
-        if (y > 0) {
-            points.add(map[y - 1][x])
-        }
-        if (y < map.size - 1) {
-            points.add(map[y + 1][x])
-        }
-        return points
-    }
-}
-
-data class Way(
-    val point: Point,
-    val steps: MutableSet<Point>,
-)
-
-data class Point(
-    val x: Int,
-    val y: Int,
-    val height: Int
-)

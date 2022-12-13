@@ -5,8 +5,9 @@ import java.util.*
 fun solution7() {
     val inputList = readInput("inputs/input7.txt")
 
-    println("Solution 7 part 1 answer ${part1(inputList)}")
-    println("Solution 7 part 2 answer ${part2(inputList)}")
+    println("Solution 7:")
+    println("   part 1 answer ${part1(inputList)}")
+    println("   part 2 answer ${part2(inputList)}")
 }
 
 private fun part1(inputList: List<String>): Int {

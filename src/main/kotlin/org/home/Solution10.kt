@@ -5,13 +5,13 @@ fun solution10() {
     val inputListTest = readInput("inputs/input101.txt")
     val inputList = readInput("inputs/input10.txt")
 
-    println("Solution 10 test ${part1(inputListTest) == 13140}")
-
-    println("Solution 10 part 1 answer ${part1(inputList)}")
+    println("Solution 10:")
+    println("   test ${part1(inputListTest) == 13140}")
+    println("   part 1 answer ${part1(inputList)}")
 
     val answer = part2(inputList)
 
-    println("Solution 10 part 2 answer ")
+    println("   part 2 answer ")
     answer.forEach { l -> println(l.joinToString(" ")) }
 }
 

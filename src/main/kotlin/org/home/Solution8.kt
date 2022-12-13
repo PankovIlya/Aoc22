@@ -3,8 +3,9 @@ package org.home
 fun solution8() {
     val inputList = readInput("inputs/input8.txt")
 
-    println("Solution 8 part 1 answer ${part1(inputList)}")
-    println("Solution 8 part 2 answer ${part2(inputList)}")
+    println("Solution 8:")
+    println("   part 1 answer ${part1(inputList)}")
+    println("   part 2 answer ${part2(inputList)}")
 }
 
 private fun part2(inputList: List<String>): Int {

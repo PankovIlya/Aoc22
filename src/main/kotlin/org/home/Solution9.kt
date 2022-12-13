@@ -7,9 +7,10 @@ fun solution9() {
     val inputListTest2 = readInput("inputs/input92.txt")
     val inputList = readInput("inputs/input9.txt")
 
-    println("Solution 9 test ${part1(inputListTest1) == 13 && part2(inputListTest2) == 36}")
-    println("Solution 9 part 1 answer ${part1(inputList)}")
-    println("Solution 9 part 2 answer ${part2(inputList)}")
+    println("Solution 9:")
+    println("   test ${part1(inputListTest1) == 13 && part2(inputListTest2) == 36}")
+    println("   part 1 answer ${part1(inputList)}")
+    println("   part 2 answer ${part2(inputList)}")
 }
 
 private fun part2(inputList: List<String>): Int {
