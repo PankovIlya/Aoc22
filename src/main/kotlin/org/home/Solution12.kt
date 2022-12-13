@@ -84,7 +84,9 @@ class CalcWay(
         ways.addAll(starts.map { Way(it, mutableSetOf(it)) })
 
         while (ways.size > 0) {
+            //print(ways.size)
             val way = ways.remove()
+
             if (way.point == end) {
                 if (minWay == null || way.steps.size < minWay!!.steps.size) {
                     minWay = way
@@ -102,6 +104,7 @@ class CalcWay(
     private fun getNext(way: Way): Collection<Way> =
         area.getNeighbours(way.point.x, way.point.y)
             .asSequence()
+            .filter { it.height - way.point.height < 2 }
             .filter { !way.steps.contains(it) }
             .map { p ->
                 val steps = way.steps.toMutableSet()
@@ -110,7 +113,6 @@ class CalcWay(
             }
             .filter { checkPoint(it.point, it.steps.size) }
             .toList()
-
 
     private fun checkPoint(point: Point, path: Int): Boolean {
         val size = calcPoint[point] ?: Int.MAX_VALUE
@@ -146,29 +148,11 @@ class Area(
 
 data class Way(
     val point: Point,
-    val steps: MutableSet<Point>
+    val steps: MutableSet<Point>,
 )
 
 data class Point(
     val x: Int,
     val y: Int,
     val height: Int
-) {
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as Point
-
-        if (x != other.x) return false
-        if (y != other.y) return false
-
-        return true
-    }
-
-    override fun hashCode(): Int {
-        var result = x
-        result = 31 * result + y
-        return result
-    }
-}
+)
