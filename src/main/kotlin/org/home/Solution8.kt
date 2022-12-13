@@ -8,7 +8,7 @@ fun solution8() {
 }
 
 private fun part2(inputList: List<String>): Int {
-    val matrix = inputList.map { it.toCharArray().map { c -> c.toString() }.map { s -> s.toInt() } }
+    val matrix = inputList.map { it.map { c -> c.toString().toInt() } }
     var max = 0
 
     matrix.forEachIndexed { i, row ->

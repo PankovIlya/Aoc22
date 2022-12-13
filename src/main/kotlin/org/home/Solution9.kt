@@ -13,7 +13,7 @@ fun solution9() {
 }
 
 private fun part2(inputList: List<String>): Int {
-    val moveMaker = MoveMaker(Point(0, 0), 1.rangeTo(9).map { Point(0, 0) })
+    val moveMaker = MoveMaker(MoveMaker.Point(0, 0), 1.rangeTo(9).map { MoveMaker.Point(0, 0) })
     inputList.forEach {
         moveMaker.move(it)
     }
@@ -91,9 +91,10 @@ private class MoveMaker(
         ((point1.x - point2.x).toDouble().pow(2) + (point1.y - point2.y).toDouble().pow(2)).pow(0.5).toInt()
 
     fun getTailUniqueCount() = history.size
+
+    data class Point(
+        var x: Int,
+        var y: Int
+    )
 }
 
-private data class Point(
-    var x: Int,
-    var y: Int
-)
