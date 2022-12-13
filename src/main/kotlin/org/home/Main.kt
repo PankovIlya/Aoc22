@@ -7,6 +7,7 @@ fun main(args: Array<String>)  {
     solution10()
     solution11()
     solution12()
+    solution13()
 }
 
 

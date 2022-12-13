@@ -5,7 +5,7 @@ import java.util.*
 
 fun solution11() {
 
-    val inputListTest = readInput("inputs/input111.txt")
+    val inputListTest = readInput("inputs/input11test.txt")
     val inputList = readInput("inputs/input11.txt")
     println("Solution 11:")
     println("   test ${part1(inputListTest) == 10605L && part2(inputListTest) == 2713310158L}")

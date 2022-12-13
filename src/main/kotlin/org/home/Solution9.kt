@@ -3,8 +3,8 @@ package org.home
 import kotlin.math.pow
 
 fun solution9() {
-    val inputListTest1 = readInput("inputs/input91.txt")
-    val inputListTest2 = readInput("inputs/input92.txt")
+    val inputListTest1 = readInput("inputs/input9test1.txt")
+    val inputListTest2 = readInput("inputs/input9test2.txt")
     val inputList = readInput("inputs/input9.txt")
 
     println("Solution 9:")

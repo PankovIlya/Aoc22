@@ -2,7 +2,7 @@ package org.home
 
 fun solution10() {
 
-    val inputListTest = readInput("inputs/input101.txt")
+    val inputListTest = readInput("inputs/input10test.txt")
     val inputList = readInput("inputs/input10.txt")
 
     println("Solution 10:")

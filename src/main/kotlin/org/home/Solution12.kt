@@ -7,7 +7,7 @@ import kotlin.math.pow
 
 fun solution12() {
 
-    val inputListTest = readInput("inputs/input121.txt")
+    val inputListTest = readInput("inputs/input12test.txt")
     val inputList = readInput("inputs/input12.txt")
 
     println("Solution 12:")
