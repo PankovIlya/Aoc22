@@ -19,17 +19,19 @@ fun solution12() {
     println("   part 2 Search A* answer ${part22(inputList)} time = ${now().toEpochMilli() - time} ms") //354
 }
 
+
 class BFS(
-    private val area: Area,
+    area: Area,
     private val starts: List<Point>,
     private val end: Point
-) {
+) : Searcher(area) {
 
-    private var calcPoint = mutableMapOf<Point, Int>()
+    override fun calc(): Int {
+        calcPoint = mutableMapOf()
 
-    fun calc(): Int {
         var minWay: Way? = null
         val ways = LinkedList<Way>()
+
         ways.addAll(starts.map { Way(it, mutableSetOf(it)) })
 
         while (ways.size > 0) {
@@ -44,42 +46,23 @@ class BFS(
         }
         return (minWay?.path?.size ?: Int.MAX_VALUE) - 1
     }
-
-    private fun getNext(way: Way): Collection<Way> =
-        area.getNeighbours(way.point.x, way.point.y)
-            .asSequence()
-            .filter { it.height - way.point.height < 2 }
-            .filter { !way.path.contains(it) }
-            .map { p ->
-                val path = way.path.toMutableSet()
-                path.add(p)
-                Way(p, path)
-            }
-            .filter { checkPoint(it.point, it.path.size) }
-            .toList()
-
-    private fun checkPoint(point: Point, path: Int): Boolean {
-        val size = calcPoint[point] ?: Int.MAX_VALUE
-        if (size > path) {
-            calcPoint[point] = path
-            return true
-        }
-        return false
-    }
 }
 
+
 class SearchA(
-    private val area: Area,
+    area: Area,
     private val starts: List<Point>,
     private val end: Point
-) {
+) : Searcher(area) {
 
-    private var calcPoint = mutableMapOf<Point, Int>()
+    override fun calc(): Int {
+        var minWay: Way? = null
 
-    fun calc(): Int {
-       var minWay: Way? = null
-       val compareByLength: Comparator<Way> = compareBy { it.point.distance(end) + it.path.size }
-       val ways = PriorityQueue(compareByLength)
+        calcPoint = mutableMapOf()
+
+        val compareByLength: Comparator<Way> = compareBy { it.point.distance(end) + it.path.size }
+        val ways = PriorityQueue(compareByLength)
+
         ways.addAll(starts.map { Way(it, mutableSetOf(it)) })
 
         while (ways.size > 0) {
@@ -94,8 +77,17 @@ class SearchA(
         }
         return (minWay?.path?.size ?: Int.MAX_VALUE) - 1
     }
+}
 
-    private fun getNext(way: Way): Collection<Way> =
+abstract class Searcher(
+    private val area: Area,
+) {
+
+    internal lateinit var calcPoint: MutableMap<Point, Int>
+
+    abstract fun calc(): Int
+
+    fun getNext(way: Way): Collection<Way> =
         area.getNeighbours(way.point.x, way.point.y)
             .asSequence()
             .filter { it.height - way.point.height < 2 }
@@ -116,9 +108,7 @@ class SearchA(
         }
         return false
     }
-
 }
-
 
 class Area(
     private val map: List<List<Point>>
@@ -164,7 +154,7 @@ private fun part1(inputList: List<String>): Int {
     return SearchA(Area(area), listOf(start), end).calc()
 }
 
-private fun part2(inputList: List<String>, print: Boolean = false): Int {
+private fun part2(inputList: List<String>): Int {
     val dict = getDict()
     val area = parseInput(inputList, dict)
     val start = area.flatMap { row -> row.filter { p -> p.height == 0 } }
@@ -173,7 +163,7 @@ private fun part2(inputList: List<String>, print: Boolean = false): Int {
     return BFS(Area(area), start, end).calc()
 }
 
-private fun part22(inputList: List<String>, print: Boolean = false): Int {
+private fun part22(inputList: List<String>): Int {
     val dict = getDict()
     val area = parseInput(inputList, dict)
     val start = area.flatMap { row -> row.filter { p -> p.height == 0 } }
