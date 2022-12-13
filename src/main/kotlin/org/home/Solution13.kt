@@ -14,7 +14,7 @@ fun solution13() {
     println("   test ${part1(inputListTest) }")
     println("   part 1 answer ${part1(inputList)}")
     val time = now().toEpochMilli()
-    println("   part 2 answer ${part2(inputList)} time = ${now().toEpochMilli() - time} ") //354
+    println("   part 2 answer ${part2(inputList)} time = ${now().toEpochMilli() - time} ms") //354
 }
 
 
@@ -26,6 +26,4 @@ private fun part2(inputList: List<String>): Int {
     return 0
 }
 
-private fun parseInput(inputList: List<String>): List<List<String>> {
 
-}
