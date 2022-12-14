@@ -12,79 +12,34 @@ fun solution14() {
 
     println("Solution 14:")
     println("   test ${part1(inputListTest) == 24 && part2(inputListTest) == 93}")
-    println("   part 1 answer ${part1(inputList)}")
-    println("   part 2 answer ${part2(inputList)}") //354
+    println("   part 1 answer ${part1(inputList)}") //1001
+    println("   part 2 answer ${part2(inputList)}") //27976
 }
 
 class SandMover(
-    private val x: Int,
-    private val y: Int,
-    private val field: List<MutableList<Int>>
+    private var start: Int,
+    private val yMax: Int,
+    private var field: List<MutableList<Int>>,
+    private var infinity : Boolean
 ) {
     private var count = 0
     fun move(): Int {
 
-        var point = Point(x, 0, 0)
+        var point = Point(start, 0, 0)
 
         while (point.value >= 0) {
-            val next = getNextPoint(point)
-            point = nextSteps(point, next)
-        }
-        return count
-    }
-
-    private fun nextSteps(point: Point, next: List<Point>): Point {
-        next.forEach { nextPoint ->
-            if (nextPoint.value == -1 || nextPoint.value == 0) {
-                return nextPoint
+            val nextPoint = nextSteps(point, getNextPoint(point))
+            if (nextPoint == Point(start, 0, 0)){
+                count += 1
+                //printField()
             }
-        }
-        count += 1
-        field[point.y][point.x] = 2
-        return Point(x, 0, 0)
-    }
-
-    private fun getNextPoint(point: Point): List<Point> =
-        if (point.y + 1 >= field.size || point.x - 1 < 0 || point.x + 1 >= field[0].size) {
-            listOf(Point(-1, -1, -1))
-        } else {
-            listOf(
-                Point(point.x, point.y + 1, field[point.y + 1][point.x]),
-                Point(point.x - 1, point.y + 1, field[point.y + 1][point.x - 1]),
-                Point(point.x + 1, point.y + 1, field[point.y + 1][point.x + 1]),
-            )
-        }
-
-    data class Point(
-        val x: Int,
-        val y: Int,
-        val value: Int,
-    )
-}
-
-class SandMover2(
-    private var x: Int,
-    private val y: Int,
-    private var field: List<MutableList<Int>>
-) {
-    private var count = 0
-    fun move(): Int {
-
-        var point = Point(x, 0, 0)
-
-        while (point.value >= 0) {
-            val next = getNextPoint(point)
-            val nextPoint = nextSteps(point, next)
             if (nextPoint != point) {
                 point = nextPoint
-                if ((point) == Point(x, 0, 0)){
-                    count += 1
-                }
             } else {
                 break
             }
         }
-        printField()
+        //printField()
         return count
     }
 
@@ -95,37 +50,42 @@ class SandMover2(
             }
         }
         field[point.y][point.x] = 2
-        return Point(x, 0, 0)
+        return Point(start, 0, 0)
     }
 
     private fun getNextPoint(point: Point): List<Point> {
-        var add = 0
         if (point.x - 1 < 0) {
-            val newField = mutableListOf<MutableList<Int>>()
-            field.forEachIndexed { i, row ->
-                newField.add((mutableListOf(if (i == y) 1 else 0) + row).toMutableList())
-            }
-            field = newField
-            x += 1
-            add += 1
+            calcNewField()
+            start += 1; point.x += 1
         }
         if (point.x + 1 >= field[0].size) {
-            field.forEachIndexed { i, row ->
-                row.add(if (i == y) 1 else 0)
-            }
+            calcAddField()
         }
         if (point.y + 1 >= field.size) {
             return listOf(Point(-1, -1, -1))
         }
 
         return listOf(
-            Point(point.x + add, point.y + 1, field[point.y + 1][point.x + add]),
-            Point(point.x - 1 + add, point.y + 1, field[point.y + 1][point.x - 1 + add]),
-            Point(point.x + 1 + add, point.y + 1, field[point.y + 1][point.x + 1 + add]),
+            Point(point.x, point.y + 1, field[point.y + 1][point.x]),
+            Point(point.x - 1, point.y + 1, field[point.y + 1][point.x - 1]),
+            Point(point.x + 1, point.y + 1, field[point.y + 1][point.x + 1]),
         )
     }
 
-    fun printField() {
+    private fun calcAddField() =
+        field.forEachIndexed { i, row ->
+            row.add(if (i == yMax && infinity) 1 else 0)
+        }
+
+    private fun calcNewField(){
+        val newField = mutableListOf<MutableList<Int>>()
+        field.forEachIndexed { i, row ->
+            newField.add((mutableListOf(if (i == yMax && infinity) 1 else 0) + row).toMutableList())
+        }
+        field = newField
+    }
+
+    private fun printField() {
         field.forEach {
             println(it.joinToString(" ") { v -> if (v == 0) "." else if (v == 1) "#" else "o" })
         }
@@ -133,8 +93,8 @@ class SandMover2(
 
 
     data class Point(
-        val x: Int,
-        val y: Int,
+        var x: Int,
+        var y: Int,
         val value: Int,
     )
 }
@@ -142,25 +102,30 @@ class SandMover2(
 
 private fun part1(inputList: List<String>): Int {
     val (minX, maxX, maxY) = getMinMax(inputList)
-    val field = List(maxY + 1) { MutableList(maxX - minX + 1) { 0 } }
-    calcField(field, inputList, minX)
-    val count = SandMover(500 - minX, maxY, field).move()
-    return count
+    val field = getField1(minX, maxX, maxY, inputList)
+    return SandMover(500 - minX, maxY, field, false).move()
 }
 
 private fun part2(inputList: List<String>): Int {
     val (minX, maxX, maxY) = getMinMax(inputList)
-    val field = MutableList(maxY + 2) { MutableList(maxX - minX + 1) { 0 } }
-    field.add(MutableList(maxX - minX + 1) { 1 })
-    calcField(field, inputList, minX)
-    val count = SandMover2(500 - minX, maxY + 2, field).move()
-    return count
+    val field = getField2(minX, maxX, maxY, inputList)
+    return SandMover(500 - minX, maxY + 2, field, true).move()
 }
 
+private fun getField1(minX: Int, maxX: Int, maxY: Int, inputList: List<String>): List<MutableList<Int>> {
+    val field = List(maxY + 1) { MutableList(maxX - minX + 1) { 0 } }
+    calcNewField(field, inputList, minX)
+    return field
+}
 
+private fun getField2(minX: Int, maxX: Int, maxY: Int, inputList: List<String>): MutableList<MutableList<Int>> {
+    val field = MutableList(maxY + 2) { MutableList(maxX - minX + 1) { 0 } }
+    field.add(MutableList(maxX - minX + 1) { 1 })
+    calcNewField(field, inputList, minX)
+    return field
+}
 
-
-fun calcField(field: List<MutableList<Int>>, inputList: List<String>, minX: Int) {
+fun calcNewField(field: List<MutableList<Int>>, inputList: List<String>, minX: Int) {
     inputList.forEach { s ->
         val iterator = s.split(" -> ").iterator()
         var (x1, y1) = iterator.next().split(",").map { it.toInt() }
