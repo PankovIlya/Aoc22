@@ -8,6 +8,7 @@ fun main(args: Array<String>)  {
     solution11()
     solution12()
     solution13()
+    solution14()
 }
 
 
