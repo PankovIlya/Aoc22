@@ -92,11 +92,7 @@ abstract class Searcher(
             .asSequence()
             .filter { it.height - way.point.height < 2 }
             .filter { !way.path.contains(it) }
-            .map { p ->
-                val path = way.path.toMutableSet()
-                path.add(p)
-                Way(p, path)
-            }
+            .map { p -> Way(p, mutableSetOf(p) + way.path)}
             .filter { checkPoint(it.point, it.path.size) }
             .toList()
 
@@ -133,7 +129,7 @@ class Area(
 
 data class Way(
     val point: Point,
-    val path: MutableSet<Point>,
+    val path: Set<Point>,
 ) {
     data class Point(
         val x: Int,
@@ -141,8 +137,6 @@ data class Way(
         val height: Int
     )
 }
-
-
 
 private fun Way.Point.distance(point: Way.Point): Int =
     abs(this.x - point.x) + abs(this.y - point.y)
