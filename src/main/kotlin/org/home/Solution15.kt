@@ -12,15 +12,20 @@ fun solution15() {
     val inputList = readInput("inputs/input15.txt")
 
     println("Solution 15:")
-    println("   test ${part2(inputListTest, 20) == 0L}")
-   // println("   test ${part1(inputListTest, 10) == 26L && part2(inputListTest, 20) == 0L}")
-    //println("   part 1 answer ${part1(inputList, 2000000)}") //5508234
-    // println("   part 2 answer ${part2(inputList, 4000000)}") //27976
+    val testCoverage = partMain(inputListTest)
+    println("   test ${testCoverage.calcLine(10) == 26L && testCoverage.calcFreeLine(20) == 56000011L}")
+    val coverage = partMain(inputList)
+    println("   part 1 answer ${coverage.calcLine(2000000)}") //5508234
+    println("   part 2 answer ${coverage.calcFreeLine(4000000)}") //10457634860779
 }
 
 class Coverage(
     private val listSB: List<Pair<Point, Point>>
 ) {
+
+    companion object{
+        private const val CONST = 4000000L
+    }
 
     private lateinit var lineCoverage: MutableMap<Long, MutableList<Pair<Long, Long>>>
 
@@ -36,10 +41,22 @@ class Coverage(
     fun calcLine(line : Long) = lineCoverage[line]?.sumOf { it.second - it.first } ?: 0L
 
     fun calcFreeLine(x : Long) : Long {
-        lineCoverage.keys.sorted().forEach {
-            println("$it ${lineCoverage[it]}")
+        lineCoverage.keys.filter { it in 0..x }.forEach {
+            val intervals = lineCoverage[it]
+            if (intervals != null && intervals.size > 1) {
+                val newIntervals = addCoverage(Pair(0, x), intervals)
+                if (newIntervals.size < intervals.size) {
+                    return getGap(Pair(0L, x), intervals) * CONST + it
+                }
+            }
         }
         return 0
+    }
+
+    private fun getGap(pair: Pair<Long, Long>, intervals: MutableList<Pair<Long, Long>>): Long {
+        val check = intervals.filter {it.second > pair.first && it.first < pair.second}.sortedBy { it.first }
+        println(check)
+        return check[0].second + 1
     }
 
     private fun calcCoverage(sensor: Point, beacon: Point) {
@@ -86,12 +103,12 @@ class Coverage(
             return listOf(interval2)
        }
 
-
-        if (interval1.second < interval2.first || interval2.second < interval1.first){
-            return listOf(interval2, interval1)
+        if ((interval1.first < interval2.first && interval1.second + 1 >= interval2.first) ||
+            (interval2.second + 1 >= interval1.first && interval2.first < interval1.first ) ){
+            return listOf(Pair(min(interval1.first, interval2.first) , max(interval1.second, interval2.second)))
         }
 
-        return listOf(Pair(min(interval1.first, interval2.first) , max(interval1.second, interval2.second)))
+         return listOf(interval1, interval2)
     }
 
     data class Point(
@@ -119,18 +136,11 @@ private fun parseInput(inputList: List<String>): List<Pair<Coverage.Point, Cover
         )
     }
 
-private fun part1(inputList: List<String>, line : Long): Long {
+private fun partMain(inputList: List<String>): Coverage {
     val list = parseInput(inputList)
     val coverage = Coverage(list)
     coverage.calc()
-    return coverage.calcLine(line)
-}
-
-private fun part2(inputList: List<String>, wide : Long): Long {
-    val list = parseInput(inputList)
-    val coverage = Coverage(list)
-    coverage.calc()
-    return coverage.calcFreeLine(wide)
+    return coverage
 }
 
 
