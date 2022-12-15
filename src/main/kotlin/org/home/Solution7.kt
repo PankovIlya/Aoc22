@@ -65,41 +65,6 @@ fun calcNeedCatalog(needSize: Int, main: Node.Catalog): Int {
     return min
 }
 
-fun buildTree(inputList: List<String>): Node.Catalog {
-    val root = Node.Catalog("/", parent = null)
-    var current = root
-
-    inputList.forEach { command ->
-        if (command.startsWith("\$ cd")) {
-            val (_, _, name) = command.split(" ")
-
-            current = when (name) {
-                "/" -> root
-                ".." -> current.parent ?: current
-                else -> current.files[name] as Node.Catalog
-            }
-        }
-
-        if (!command.startsWith("$")) {
-            val (value, name) = command.split(" ")
-
-            if (value == "dir") {
-                current.files[name] = Node.Catalog(
-                    name = name,
-                    parent = current
-                )
-            } else {
-                current.files[name] = Node.File(
-                    name = name,
-                    size = value.toInt()
-                )
-            }
-        }
-    }
-    return root
-}
-
-
 sealed class Node(
     open val name: String,
 ) {
@@ -132,4 +97,38 @@ sealed class Node(
             }
         }
     }
+}
+
+fun buildTree(inputList: List<String>): Node.Catalog {
+    val root = Node.Catalog("/", parent = null)
+    var current = root
+
+    inputList.forEach { command ->
+        if (command.startsWith("\$ cd")) {
+            val (_, _, name) = command.split(" ")
+
+            current = when (name) {
+                "/" -> root
+                ".." -> current.parent ?: current
+                else -> current.files[name] as Node.Catalog
+            }
+        }
+
+        if (!command.startsWith("$")) {
+            val (value, name) = command.split(" ")
+
+            if (value == "dir") {
+                current.files[name] = Node.Catalog(
+                    name = name,
+                    parent = current
+                )
+            } else {
+                current.files[name] = Node.File(
+                    name = name,
+                    size = value.toInt()
+                )
+            }
+        }
+    }
+    return root
 }

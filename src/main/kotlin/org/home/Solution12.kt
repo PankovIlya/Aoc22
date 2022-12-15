@@ -22,8 +22,8 @@ fun solution12() {
 
 class BFS(
     area: Area,
-    private val starts: List<Point>,
-    private val end: Point
+    private val starts: List<Way.Point>,
+    private val end: Way.Point
 ) : Searcher(area) {
 
     override fun calc(): Int {
@@ -51,8 +51,8 @@ class BFS(
 
 class SearchA(
     area: Area,
-    private val starts: List<Point>,
-    private val end: Point
+    private val starts: List<Way.Point>,
+    private val end: Way.Point
 ) : Searcher(area) {
 
     override fun calc(): Int {
@@ -83,7 +83,7 @@ abstract class Searcher(
     private val area: Area,
 ) {
 
-    internal lateinit var calcPoint: MutableMap<Point, Int>
+    internal lateinit var calcPoint: MutableMap<Way.Point, Int>
 
     abstract fun calc(): Int
 
@@ -100,7 +100,7 @@ abstract class Searcher(
             .filter { checkPoint(it.point, it.path.size) }
             .toList()
 
-    private fun checkPoint(point: Point, path: Int): Boolean {
+    private fun checkPoint(point: Way.Point, path: Int): Boolean {
         val size = calcPoint[point] ?: Int.MAX_VALUE
         if (size > path) {
             calcPoint[point] = path
@@ -111,10 +111,10 @@ abstract class Searcher(
 }
 
 class Area(
-    private val map: List<List<Point>>
+    private val map: List<List<Way.Point>>
 ) {
-    fun getNeighbours(x: Int, y: Int): List<Point> {
-        val points = mutableListOf<Point>()
+    fun getNeighbours(x: Int, y: Int): List<Way.Point> {
+        val points = mutableListOf<Way.Point>()
         if (x > 0) {
             points.add(map[y][x - 1])
         }
@@ -134,15 +134,17 @@ class Area(
 data class Way(
     val point: Point,
     val path: MutableSet<Point>,
-)
+) {
+    data class Point(
+        val x: Int,
+        val y: Int,
+        val height: Int
+    )
+}
 
-data class Point(
-    val x: Int,
-    val y: Int,
-    val height: Int
-)
 
-private fun Point.distance(point: Point): Int =
+
+private fun Way.Point.distance(point: Way.Point): Int =
     abs(this.x - point.x) + abs(this.y - point.y)
 
 private fun part1(inputList: List<String>): Int {
@@ -172,27 +174,27 @@ private fun part22(inputList: List<String>): Int {
     return SearchA(Area(area), start, end).calc()
 }
 
-private fun parseInput(inputList: List<String>, dict: Map<Char, Int>): List<List<Point>> {
-    val resultLis = mutableListOf<MutableList<Point>>()
+private fun parseInput(inputList: List<String>, dict: Map<Char, Int>): List<List<Way.Point>> {
+    val resultLis = mutableListOf<MutableList<Way.Point>>()
     inputList.forEachIndexed { i, row ->
         resultLis.add(mutableListOf())
         row.toCharArray().forEachIndexed { j, c ->
-            resultLis.last().add(Point(j, i, dict[c]!!))
+            resultLis.last().add(Way.Point(j, i, dict[c]!!))
         }
     }
     return resultLis
 }
 
 
-private fun parseInput(value: Char, inputList: List<String>, dict: Map<Char, Int>): Point {
+private fun parseInput(value: Char, inputList: List<String>, dict: Map<Char, Int>): Way.Point {
     inputList.forEachIndexed { i, row ->
         row.toCharArray().forEachIndexed { j, c ->
             if (c == value) {
-                return Point(j, i, dict[value]!!)
+                return Way.Point(j, i, dict[value]!!)
             }
         }
     }
-    return Point(0, 0, 0)
+    return Way.Point(0, 0, 0)
 }
 
 private fun getDict(): Map<Char, Int> {

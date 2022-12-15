@@ -20,15 +20,13 @@ private fun part2(inputList: List<String>): Long {
         .reduce { acc, div -> acc * div }
 
     val monkeyMover = MonkeyMover(monkeys) { x -> x % module }
-    monkeyMover.move(10000)
-    return monkeyMover.getScore()
+    return monkeyMover.move(10000)
 }
 
 
 private fun part1(inputList: List<String>): Long {
     val monkeyMover = MonkeyMover(buildMonkeys(inputList)) { x -> x / 3 }
-    monkeyMover.move(20)
-    return monkeyMover.getScore()
+    return monkeyMover.move(20)
 }
 
 private class MonkeyMover(
@@ -36,12 +34,15 @@ private class MonkeyMover(
     private val foo: (x: Long) -> Long
 ) {
 
-    private val score = monkeys.associate { it.id to 0L }.toMutableMap()
+    private lateinit var score : MutableMap<Int, Long>
 
-    fun move(n: Int) {
+    fun move(n: Int): Long {
+        score = monkeys.associate { it.id to 0L }.toMutableMap()
+
         repeat(n) {
             monkeys.forEach { calc(it) }
         }
+        return getScore()
     }
 
     private fun calc(monkey: Monkey) {
@@ -75,7 +76,7 @@ private class MonkeyMover(
         score[monkey.id] = score[monkey.id]?.plus(monkey.items.size) ?: 0
     }
 
-    fun getScore(): Long {
+    private fun getScore(): Long {
         val list = score.values.map { it }.sortedDescending()
         return list[0] * list[1]
     }

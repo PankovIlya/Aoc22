@@ -29,18 +29,18 @@ class SandMover(
 
         while (point.value >= 0) {
             val nextPoint = nextSteps(point, getNextPoint(point))
-            if (nextPoint == Point(start, 0, 0)){
-                count += 1
-                //printField()
-            }
             if (nextPoint != point) {
                 point = nextPoint
             } else {
                 break
             }
+            if (nextPoint == Point(start, 0, 0)){
+                count += 1
+                //printField()
+            }
         }
         //printField()
-        return count
+        return count + 1
     }
 
     private fun nextSteps(point: Point, next: List<Point>): Point {
