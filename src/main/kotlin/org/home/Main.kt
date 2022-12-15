@@ -1,5 +1,8 @@
 package org.home
 
+import java.io.File
+import java.io.InputStream
+
 fun main(args: Array<String>)  {
     solution7()
     solution8()
@@ -11,7 +14,10 @@ fun main(args: Array<String>)  {
     solution14()
 }
 
-
+fun readInput(file: String): List<String> {
+    val inputStream: InputStream = File(file).inputStream()
+    return inputStream.bufferedReader().readLines()
+}
 
 
 

@@ -85,11 +85,11 @@ class SandMover(
         field = newField
     }
 
-    private fun printField() {
+/*    private fun printField() {
         field.forEach {
             println(it.joinToString(" ") { v -> if (v == 0) "." else if (v == 1) "#" else "o" })
         }
-    }
+    }*/
 
 
     data class Point(

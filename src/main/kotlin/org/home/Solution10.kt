@@ -63,7 +63,7 @@ private fun part1(inputList: List<String>): Int {
 fun getList(inputList: List<String>): List<String> {
     val list = mutableListOf<String>()
 
-    inputList.forEachIndexed { i, command ->
+    inputList.forEach {command ->
         if (command.startsWith("addx")) {
             val (_, value) = command.split(" ")
             list.add("addx")
