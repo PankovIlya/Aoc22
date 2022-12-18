@@ -14,7 +14,7 @@ fun solution15() {
     val inputList = readInput("inputs/input15.txt")
 
     println("Solution 15:")
-    
+
     val testCoverage = partMain(inputListTest)
     println("   test ${testCoverage.calcLine(10) == 26 && testCoverage.calcFreeLine(20) == 56000011L}")
 
@@ -71,10 +71,16 @@ class Coverage(
 
             val coverageX = distance - abs(sensor.y - y)
 
-            lineCoverage[y] = addCoverage(
-                Pair(sensor.x - coverageX, sensor.x + coverageX),
-                lineCoverage[y]
-            )
+            val x1 = sensor.x - coverageX
+            val x2 = sensor.x + coverageX
+
+            if ((x1 in 0..CONST) || (x2 in 0..CONST) || (x1 <= 0 && x2 >= CONST)){
+
+                lineCoverage[y] = addCoverage(
+                    Pair(sensor.x - coverageX, sensor.x + coverageX),
+                    lineCoverage[y]
+                )
+            }
         }
     }
 

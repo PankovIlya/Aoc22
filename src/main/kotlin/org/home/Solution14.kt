@@ -29,9 +29,11 @@ class SandMover(
 
         while (point.value >= 0) {
             val nextPoint = nextSteps(point, getNextPoint(point))
+
             if (nextPoint != point) {
                 point = nextPoint
             } else {
+                count += 1
                 break
             }
             if (nextPoint == Point(start, 0, 0)){
@@ -40,7 +42,7 @@ class SandMover(
             }
         }
         //printField()
-        return count + 1
+        return count
     }
 
     private fun nextSteps(point: Point, next: List<Point>): Point {
