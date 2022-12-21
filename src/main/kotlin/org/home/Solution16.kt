@@ -1,8 +1,6 @@
 package org.home
 
-import java.time.Instant.now
 import java.util.*
-import kotlin.math.max
 
 
 fun solution16() {
@@ -31,24 +29,27 @@ class Volkan(
     fun part2(
         n: Int,
         first: Point,
-        ratePoints: Set<Point>
+        ratePoints: List<Point>
     ): Int {
 
-        val combinations = allWay(n, first, ratePoints.toList(), listOf())
+        val combinations = allWay(n, first, ratePoints, listOf())
+            .asSequence()
             .map { it.toSet() to calcWay(n, first, it) }
             .groupBy({ it.first }, { it.second })
             .map { kv -> Pair(kv.key, kv.value.maxOf { it }) }
-            .filter { it.second > 0 }
             .sortedByDescending { it.second }
+            .filter { it.second > 0 }
+            .toList()
 
         var max = 0
 
-        combinations.forEachIndexed { i, first ->
-            if (first.second * 2 < max) return max
+        combinations.forEachIndexed { i, firstWay ->
+            if (firstWay.second * 2 < max) return max
             for (j in (i + 1) until combinations.size) {
                 val second = combinations[j]
-                if ((first.first intersect second.first).isEmpty()) {
-                    val value = first.second + second.second
+
+                if ((firstWay.first intersect second.first).isEmpty()) {
+                    val value = firstWay.second + second.second
                     if (value > max) {
                         max = value
                     }
@@ -132,22 +133,37 @@ private fun part1(inputList: List<String>): Int {
     val points = parseInputPoint(inputList)
     val edges = parseInputEdges(inputList, points.associateBy { it.name })
 
-    val ratePoints = points.filter { it.name != "AA" }.filter { it.rate > 0 }.toList()
-    val way = points.flatMap { Dijkstra(it, edges).calc().map { kv -> Pair(it, kv.key) to kv.value } }.toMap()
+    val ratePoints = points
+        .filter { it.name != "AA" }
+        .filter { it.rate > 0 }
+        .toList()
 
-    return Volkan(way).part1(
-        30, points.first { it.name == "AA" }, ratePoints,
-    )
+    val way = points
+        .flatMap {
+            Dijkstra(it, edges).calc()
+                .map { kv -> Pair(it, kv.key) to kv.value }
+        }
+        .toMap()
+
+    return Volkan(way).part1(30, points.first { it.name == "AA" }, ratePoints)
 }
 
 private fun part2(inputList: List<String>): Int {
     val points = parseInputPoint(inputList)
     val edges = parseInputEdges(inputList, points.associateBy { it.name })
 
-    val way = points.flatMap { Dijkstra(it, edges).calc().map { kv -> Pair(it, kv.key) to kv.value } }.toMap()
-    val ratePoints = points.filter { it.name != "AA" }.filter { it.rate > 0 }.toList()
+    val way = points
+        .flatMap {
+            Dijkstra(it, edges).calc()
+                .map { kv -> Pair(it, kv.key) to kv.value }
+        }
+        .toMap()
 
-    return Volkan(way).part2(26, points.first { it.name == "AA" }, ratePoints.toSet())
+    val ratePoints = points
+        .filter { it.name != "AA" }.filter { it.rate > 0 }
+        .toList()
+
+    return Volkan(way).part2(26, points.first { it.name == "AA" }, ratePoints)
 }
 
 fun parseInputEdges(inputList: List<String>, points: Map<String, Volkan.Point>) =
