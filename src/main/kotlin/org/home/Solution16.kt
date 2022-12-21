@@ -2,6 +2,7 @@ package org.home
 
 import java.time.Instant.now
 import java.util.*
+import kotlin.math.max
 
 
 fun solution16() {
@@ -12,10 +13,91 @@ fun solution16() {
     println("Solution 16:")
     println("   test ${part1(inputListTest) == 1651 && part2(inputListTest) == 1707}")
     println("   part 1 answer ${part1(inputList)}") // 2114
-    var time = now().toEpochMilli()
-    println("   part 2 answer ${part2(inputList)} time = ${now().toEpochMilli() - time} ms") //2666
+    println("   part 2 answer ${part2(inputList)}") //2666
 }
 
+class Volkan(
+    private val distance: Map<Pair<Point, Point>, Int>
+) {
+
+    fun part1(
+        n: Int,
+        first: Point,
+        ratePoints: List<Point>,
+    ) = allWay(n, first, ratePoints, listOf())
+        .map { calcWay(n, first, it) }
+        .maxOf { it }
+
+    fun part2(
+        n: Int,
+        first: Point,
+        ratePoints: Set<Point>
+    ): Int {
+
+        val combinations = allWay(n, first, ratePoints.toList(), listOf())
+            .map { it.toSet() to calcWay(n, first, it) }
+            .groupBy({ it.first }, { it.second })
+            .map { kv -> Pair(kv.key, kv.value.maxOf { it }) }
+            .filter { it.second > 0 }
+            .sortedByDescending { it.second }
+
+        var max = 0
+
+        combinations.forEachIndexed { i, first ->
+            if (first.second * 2 < max) return max
+            for (j in (i + 1) until combinations.size) {
+                val second = combinations[j]
+                if ((first.first intersect second.first).isEmpty()) {
+                    val value = first.second + second.second
+                    if (value > max) {
+                        max = value
+                    }
+                }
+
+            }
+        }
+        return max
+
+    }
+
+    private fun allWay(
+        n: Int,
+        current: Point,
+        ways: List<Point>,
+        done: List<Point>
+    ): List<List<Point>> {
+        if (n > 0) {
+            return listOf(done) + ways.flatMap { next ->
+                allWay(
+                    n - distance[Pair(current, next)]!! - 1,
+                    next,
+                    ways - next,
+                    done + next
+                )
+            }
+
+        }
+        return listOf()
+    }
+
+    private fun calcWay(n: Int, first: Point, list: List<Point>): Int {
+        var prev = first
+        var time = n
+        var sum = 0
+        list.forEach { next ->
+            time -= distance[Pair(prev, next)]!! + 1
+            sum += next.rate * time
+            prev = next
+        }
+        return sum
+    }
+
+    data class Point(
+        val name: String,
+        val rate: Int,
+    )
+
+}
 
 class Dijkstra(
     private val main: Volkan.Point,
@@ -44,87 +126,6 @@ class Dijkstra(
         return points
     }
 
-}
-
-class Volkan(
-    private val distance: Map<Pair<Point, Point>, Int>
-) {
-
-    private val cache2 = mutableMapOf<Key, Int>()
-
-    fun part1(
-        n: Int,
-        current: Point,
-        ways: List<Point>,
-    ): Int {
-        if (n <= 0) return 0
-
-        if (ways.isEmpty()) return current.rate * n
-
-        val cacheVal = Key(n, current, ways.toSet())
-
-        val max = cache2[cacheVal] ?: ways.map { next ->
-            part1(
-                n - distance[Pair(current, next)]!! - 1,
-                next,
-                ways.toList() - next
-            )
-        }.maxOf { it } + current.rate * n
-
-        cache2[cacheVal] = max
-
-        return max
-    }
-
-
-    data class Key(val i: Int, val current: Volkan.Point, val toSet: Set<Point>)
-
-    fun part2(
-        n: Int,
-        first: Point,
-        ratePoints: Set<Point>
-    ): Int {
-        val combinations = combinationsAll(ratePoints.toList())
-        var i = -1
-        val result = combinations
-            .map {
-                ++i
-                //print("\r")
-                //print("   combination ${(i.toDouble()/2 * 100).div(combinations.size.div(2)).toInt()}%")
-                part1(n, first, it.toList()) + part1(n, first, (ratePoints - it).toList())
-            }.maxOf { it }
-        //println()
-        return result
-    }
-
-    data class Point(
-        val name: String,
-        val rate: Int,
-    )
-
-}
-
-fun <T> combinations(lst: List<T>, k: Int): List<List<T>> {
-    if (k == 0) {
-        return mutableListOf(mutableListOf())
-    }
-    val local = mutableListOf<List<T>>()
-
-    for (idx in 0.rangeTo(lst.size - 1)) {
-        for (item in combinations(lst.subList(idx + 1, lst.size), k - 1)) {
-            local.add(mutableListOf(lst[idx]) + item)
-        }
-    }
-    return local
-}
-
-
-fun <T> combinationsAll(lst: List<T>): List<List<T>> {
-    val local = mutableListOf<List<T>>()
-    for (k in 1.rangeTo(lst.size)) {
-        local.addAll(combinations(lst, k))
-    }
-    return local
 }
 
 private fun part1(inputList: List<String>): Int {
