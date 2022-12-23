@@ -12,8 +12,9 @@ fun main(args: Array<String>)  {
     solution12()
     solution13()
     solution14()
-    solution15()
+    //solution15()
     solution16()
+    solution21()
 }
 
 fun readInput(file: String): List<String> {

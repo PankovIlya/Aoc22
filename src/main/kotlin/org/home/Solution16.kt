@@ -1,6 +1,7 @@
 package org.home
 
 import java.util.*
+import kotlin.math.max
 
 
 fun solution16() {
@@ -31,12 +32,11 @@ class Volkan(
         first: Point,
         ratePoints: List<Point>
     ): Int {
-
         val combinations = allWay(n, first, ratePoints, listOf())
             .asSequence()
             .map { it.toSet() to calcWay(n, first, it) }
-            .groupBy({ it.first }, { it.second })
-            .map { kv -> Pair(kv.key, kv.value.maxOf { it }) }
+            .groupingBy{it.first }.fold(0) { max, value -> max(max, value.second)  }
+            .map {it.key to it.value }
             .sortedByDescending { it.second }
             .filter { it.second > 0 }
             .toList()

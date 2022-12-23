@@ -10,9 +10,9 @@ fun solution13() {
     val inputList = readInput("inputs/input13.txt")
 
     println("Solution 13:")
-    println("   test ${part1(inputListTest)}")
-    println("   part 1 answer ${part1(inputList)}")
-    println("   part 2 answer ${part2(inputList)}") //354
+    println("   test ${part1(inputListTest) == 13 && part2(inputListTest) == 140}")
+    println("   part 1 answer ${part1(inputList)}") //5675
+    println("   part 2 answer ${part2(inputList)}") //20383
 }
 
 
