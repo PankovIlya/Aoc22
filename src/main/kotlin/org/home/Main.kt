@@ -14,6 +14,7 @@ fun main(args: Array<String>)  {
     solution14()
     //solution15()
     solution16()
+    solution18()
     solution21()
 }
 

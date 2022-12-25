@@ -22,19 +22,15 @@ private fun part1(inputList: List<String>): Long {
 
 private fun part2(inputList: List<String>): Long {
     val monkeys = parseInput(inputList)
-    val lastMonkey = buildReverseMonkey(monkeys)
-    val lastCommand = (lastMonkey.reverseCommand as Command.Foo)
-    val root = monkeys["root"]!!
-    val second = if (lastCommand.monkey1 == root) lastCommand.monkey2 else lastCommand.monkey1
-    root.reverseCommand = Command.Number(second.command.value * 2)
+    buildReverseMonkey(monkeys)
     return monkeys["humn"]!!.reverseCommand.value.toLong()
 }
 
 private fun parseInput(inputList: List<String>): Map<String, Monkey2> {
-    val monkeys = inputList.map { s ->
+    val monkeys = inputList.associate { s ->
         val monkey = s.split(": ")
         monkey[0] to Monkey2(monkey[0], monkey[1])
-    }.toMap()
+    }
 
     monkeys.values.forEach { monkey ->
         val command = monkey.commandStr.split(" ")
@@ -60,7 +56,7 @@ private fun parseInput(inputList: List<String>): Map<String, Monkey2> {
 }
 
 
-fun buildReverseMonkey(monkeys: Map<String, Monkey2>): Monkey2 {
+fun buildReverseMonkey(monkeys: Map<String, Monkey2>) {
     val monkeysList = monkeys.values
     val monkeysCommand = monkeysList.map {
         it to
@@ -108,7 +104,10 @@ fun buildReverseMonkey(monkeys: Map<String, Monkey2>): Monkey2 {
         monkey = nextMonkey
     }
 
-    return lastMonkey
+    val lastCommand = (lastMonkey.reverseCommand as Command.Foo)
+    val root = monkeys["root"]!!
+    val second = if (lastCommand.monkey1 == root) lastCommand.monkey2 else lastCommand.monkey1
+    root.reverseCommand = Command.Number(second.command.value * 2)
 }
 
 sealed class Command {
