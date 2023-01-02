@@ -2,8 +2,12 @@ package org.home
 
 import java.io.File
 import java.io.InputStream
+import java.util.*
+import kotlin.math.max
+import kotlin.math.roundToInt
 
-fun main(args: Array<String>)  {
+
+fun main(args: Array<String>) {
     solution7()
     solution8()
     solution9()
@@ -16,12 +20,14 @@ fun main(args: Array<String>)  {
     solution16()
     solution18()
     solution21()
+    solution23()
 }
 
 fun readInput(file: String): List<String> {
     val inputStream: InputStream = File(file).inputStream()
     return inputStream.bufferedReader().readLines()
 }
+
 
 
 

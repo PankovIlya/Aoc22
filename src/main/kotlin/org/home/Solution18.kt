@@ -9,7 +9,6 @@ fun solution18() {
     val inputList = readInput("inputs/input18.txt")
 
     println("Solution 18:")
-    println("   test ${part2(inputListTest)}")
     println("   test ${part1(inputListTest) == 64 && part2(inputListTest) == 58}")
     println("   part 1 answer ${part1(inputList)}") // 3636
     println("   part 2 answer ${part2(inputList)}") // 2102
@@ -41,7 +40,8 @@ fun calcDrowning(points: Set<Point3d>, allPoints: Set<Point3d>): Set<Point3d> {
     visitors.add(allPoints.first())
     while (!ways.isEmpty()) {
         val point = ways.pollFirst()
-        val nextPoints = getSibling(point).filter { allPoints.contains(it) && !points.contains(it) && !visitors.contains(it)}
+        val nextPoints = getSibling(point)
+            .filter { allPoints.contains(it) && !points.contains(it) && !visitors.contains(it)}
         visitors.addAll(nextPoints)
         ways.addAll(nextPoints)
     }
