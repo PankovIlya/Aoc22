@@ -42,6 +42,31 @@ private fun part1(inputList: List<String>): Int {
     return result
 }
 
+private fun part2(inputList: List<String>): Int {
+    var points = parseInput(inputList)
+    val rounds = Rounds()
+    var noSteps = false
+    var round = 0
+
+    while (!noSteps) {
+        val map = mutableMapOf<Point, List<Point>>()
+        noSteps = true
+        points.forEach { point ->
+            val nextPoint = rounds.getNextPoint(point, points)
+            map[nextPoint.first] = (map[nextPoint.first] ?: listOf()) + nextPoint.first
+            noSteps = noSteps && nextPoint.second
+        }
+        points =
+            map.flatMap { kv -> if (kv.value.size == 1) listOf(kv.key) else kv.value.map { it.prev ?: it } }.toSet()
+        rounds.next()
+        round += 1
+    }
+
+
+    return round
+}
+
+
 
 class Rounds {
 
@@ -88,14 +113,9 @@ class Rounds {
     }
 
     fun getNextPoint(point: Point, points: Set<Point>): Pair<Point, Boolean> {
-        var res = true
-        steps.forEach { step ->
-            if (step.check(point, points)) {
-                res = false
-            }
-        }
-
-        if (res) return Pair(point, true)
+        if (!steps.map { step ->
+                step.check(point, points)
+            }.any { it }) return Pair(point, true)
 
         steps.forEach { step ->
             if (!step.check(point, points)) {
@@ -152,29 +172,6 @@ private fun parseInput(inputList: List<String>): Set<Point> {
     return points
 }
 
-private fun part2(inputList: List<String>): Int {
-    var points = parseInput(inputList)
-    val rounds = Rounds()
-    var noSteps = false
-    var round = 0
-
-    while (!noSteps) {
-        val map = mutableMapOf<Point, List<Point>>()
-        noSteps = true
-        points.forEach { point ->
-            val nextPoint = rounds.getNextPoint(point, points)
-            map[nextPoint.first] = (map[nextPoint.first] ?: listOf()) + nextPoint.first
-            noSteps = noSteps && nextPoint.second
-        }
-        points =
-            map.flatMap { kv -> if (kv.value.size == 1) listOf(kv.key) else kv.value.map { it.prev ?: it } }.toSet()
-        rounds.next()
-        round += 1
-    }
-
-
-    return round
-}
 
 
 

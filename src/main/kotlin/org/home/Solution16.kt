@@ -177,7 +177,7 @@ fun parseInputEdges(inputList: List<String>, points: Map<String, Volkan.Point>) 
 
     }
 
-fun parseInputPoint(inputList: List<String>) =
+private fun parseInputPoint(inputList: List<String>) =
     inputList.map {
         val arr = it.split("; ")[0].split(" ")
         Volkan.Point(
