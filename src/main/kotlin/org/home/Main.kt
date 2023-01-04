@@ -22,6 +22,8 @@ fun main(args: Array<String>) {
     solution21()
     solution23()
     solution24()
+    solution25()
+    solution19()
 }
 
 fun readInput(file: String): List<String> {

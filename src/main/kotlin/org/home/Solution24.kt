@@ -40,13 +40,14 @@ class SearchPath(
 ) {
 
     fun search(): Int {
-        val queue = LinkedList<SnowWay>()
-        queue.add(SnowWay(start, step))
         val visited = mutableSetOf<SnowWay>()
         var max = Int.MAX_VALUE
+        val queue = LinkedList<SnowWay>()
+        queue.add(SnowWay(start, step))
 
         while (queue.size > 0) {
             val way = queue.pollFirst()
+
             if (way.point == end) {
                 if (way.step < max) max = way.step
             } else {
