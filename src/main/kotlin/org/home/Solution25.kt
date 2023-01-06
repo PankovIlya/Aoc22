@@ -8,7 +8,6 @@ fun solution25() {
     val inputList = readInput("inputs/input25.txt")
 
     println("Solution 25:")
-    println("   test ${part1(inputListTest)}")
     println("   test ${part1(inputListTest) == "2=-1=0" && part2(inputListTest) == ""}")
     println("   part 1 answer ${part1(inputList)}") // 2-1-110-=01-1-0-0==2
     println("   part 2 answer ${part2(inputList)}") // 960

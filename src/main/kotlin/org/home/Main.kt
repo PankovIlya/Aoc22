@@ -8,7 +8,7 @@ import kotlin.math.roundToInt
 
 
 fun main(args: Array<String>) {
-    solution7()
+/*    solution7()
     solution8()
     solution9()
     solution10()
@@ -22,7 +22,7 @@ fun main(args: Array<String>) {
     solution21()
     solution23()
     solution24()
-    solution25()
+    solution25()*/
     solution19()
 }
 
