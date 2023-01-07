@@ -63,8 +63,7 @@ class Plant {
     }
 
     private fun nextPlans(plan: Plan, maxStep: Int, geodeRobot: Robot): List<Plan> =
-        if (checkRobot(geodeRobot, plan) && getRobotStep(geodeRobot, plan) == 0
-        ) {
+        if (checkRobot(geodeRobot, plan) && getRobotStep(geodeRobot, plan) == 0) {
             listOf(calcPlan(geodeRobot, plan, 1))
         } else {
             val plans = plan.robotPlan.values
@@ -74,9 +73,9 @@ class Plant {
                             plan.needRobots[it.robotType]!! > plan.resourceRobot[it.robotType]!!
                 }
                 .filter { checkRobot(it, plan) }
-                .map { it to getRobotStep(it, plan) }
-                .map { calcPlan(it.first, plan, if (it.second == 0) 1 else it.second + 1) }
-                .filter { it.step <= maxStep }
+                .map { it to getRobotStep(it, plan) + 1}
+                .filter { plan.step + it.second <= maxStep }
+                .map { calcPlan(it.first, plan,  it.second) }
                 .toList()
 
             plans.ifEmpty {
@@ -141,7 +140,6 @@ class Plant {
 }
 
 data class Plan(
-    //val robotStep : MutableMap<Robot, List<Int>>,
     val resourceRobot: MutableMap<ResourceType, Int> =
         ResourceType.values().associate { it to if (it == ResourceType.ARE) 1 else 0 }.toMutableMap(),
     val resource: Map<ResourceType, Int> =
