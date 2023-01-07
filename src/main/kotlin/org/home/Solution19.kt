@@ -46,15 +46,15 @@ class Plant {
         val queue = LinkedList<Plan>()
         queue.add(plan)
         var max = 0
+        
         while (queue.size > 0) {
             val currentPlan = queue.pollLast()
             if (currentPlan.step == maxStep) {
                 max = max(currentPlan.resource[ResourceType.GEODE] ?: 0, max)
             } else {
-                val nextPlans = nextPlans(currentPlan, maxStep, geodeRobot)
-                    .filter { calcLimit(it, maxStep) >= max }
                 queue.addAll(
-                    nextPlans
+                    nextPlans(currentPlan, maxStep, geodeRobot)
+                        .filter { calcLimit(it, maxStep) >= max }
                 )
             }
 
