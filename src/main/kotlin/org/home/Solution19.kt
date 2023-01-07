@@ -1,6 +1,16 @@
 package org.home
 
+import javafx.application.Application.launch
+import java.time.Instant
 import java.util.*
+import kotlin.math.ceil
+import kotlin.math.roundToInt
+
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import java.util.stream.Collectors
+
 
 fun solution19() {
 
@@ -8,24 +18,36 @@ fun solution19() {
     val inputList = readInput("inputs/input19.txt")
 
     println("Solution 19:")
-    println("   test ${part1(inputListTest)}")
-    //println("   test ${part1(inputListTest) == 33 && part2(inputListTest) == 0}")
-    //println("   part 1 answer ${part1(inputList)}") //
-    //println("   part 2 answer ${part2(inputList)}") //
+    println("   test ${part1(inputListTest) == 33 && part2(inputListTest) == 3472}")
+    var time = Instant.now().epochSecond
+    println("   part 1 answer ${part1(inputList)} execution time = ${Instant.now().epochSecond - time}s") // 1115
+    time = Instant.now().epochSecond
+    println("   part 2 answer ${part2(inputList)} execution time = ${Instant.now().epochSecond - time}s") //
 }
 
 private fun part1(inputList: List<String>): Int {
     val plans = parseInput(inputList)
     return plans.parallelStream().map { plan ->
-        Plant().calc(24, plan.first) * (plan.second)
-    }.mapToInt { it }.sum()
+        val calc = Plant().calc(24, plan.first)
+        println(calc)
+        calc * (plan.second)
+    }.mapToInt{it}.sum()
 }
 
 private fun part2(inputList: List<String>): Int {
-    return 0
+    val plans = parseInput(inputList)
+    return plans.take(3).parallelStream().map { plan ->
+        val calc = Plant().calc(32, plan.first)
+        println(calc)
+        calc
+    }.collect(Collectors.toList()).fold(1) { a, b -> a * b }
 }
 
 class Plant {
+
+    var max = 0
+
+    val cache = mutableSetOf<Plan>()
 
     fun calc(maxStep: Int, plan: Plan): Int {
         val queue = LinkedList<Plan>()
@@ -38,9 +60,15 @@ class Plant {
                     max = currentPlan.resource[ResourceType.GEODE]!!
                 }
             } else {
-                queue.addAll(nextPlans(currentPlan, maxStep)
+                val nextPlans = nextPlans(currentPlan, maxStep)
                     .filter { calcLimit(it, maxStep) >= max }
+                    //.filter {  !cache.contains(it) }
 
+
+                //cache.addAll(nextPlans)
+
+                queue.addAll(
+                    nextPlans
                 )
             }
 
@@ -48,35 +76,65 @@ class Plant {
         return max
     }
 
+/*
+    fun calc2(maxStep: Int, plan: Plan): Int {
+        return if (plan.step == maxStep) {
+                val current = plan.resource[ResourceType.GEODE]!!
+                if (max < current) {
+                    max =current
+                }
+                current
+            } else {
+                if (cache.contains(plan)){
+                    cache[plan]!!
+                } else {
+                    val plans = nextPlans(plan, maxStep).filter { calcLimit(it, maxStep) >= max }
+                    if (plans.isEmpty())  0 else {
+                        val max = plans.map { calc2(maxStep, it) }.maxOf { it }
+                        cache[plan] = max
+                        max
+                    }
+                }
+            }
+    }
+*/
+
     private fun calcLimit(plan: Plan, maxStep: Int): Int {
         return (plan.resource[ResourceType.GEODE] ?: 0) +
-                ((plan.resourceRobot[ResourceType.GEODE] ?: 0) * (maxStep - plan.step)) + maxStep - plan.step
+                ((plan.resourceRobot[ResourceType.GEODE] ?: 0) * (maxStep - plan.step)) +
+                1.rangeTo(maxStep - plan.step).sum()
+/*                if (checkRobot(plan.robotPlan[ResourceType.GEODE]!!, plan)) {
+                    1.rangeTo(maxStep - plan.step).sum()
+                } else 1.rangeTo(maxStep - plan.step).sum() / 2*/
     }
 
     private fun nextPlans(plan: Plan, maxStep : Int): List<Plan> {
         val geodeRobot = plan.robotPlan[ResourceType.GEODE]!!
 
         return if (checkRobot(geodeRobot, plan) &&
-            getRobotStep(geodeRobot, plan) == 1 && ((plan.step + 1) <= maxStep)
+            getRobotStep(geodeRobot, plan) == 0 && ((plan.step + 1) <= maxStep)
         ) {
             listOf(calcPlan(geodeRobot, plan, 1))
+            // } else if (checkRobot(geodeRobot, plan) &&  plan.step + getRobotStep(geodeRobot, plan)  > maxStep ) {
+          //listOf(calcPlan(null, plan, maxStep - plan.step ))
         } else {
             val plans = plan.robotPlan.values
                 .filter { checkRobot(it, plan) }
                 .map{it to  getRobotStep(it, plan)}
-                .filter { plan.step + it.second <= maxStep }
-                .map { calcPlan(it.first, plan, if (it.second == 0) 1 else it.second) }
+                .map { calcPlan(it.first, plan, if (it.second == 0) 1 else it.second + 1) }
+                .filter { it.step  <= maxStep }
 
-            if (plans.isEmpty() && (plan.step + 1) <= maxStep) {
-                return listOf(calcPlan(null, plan, 1 ))
+            if (plans.isEmpty() ) {
+                return listOf(calcPlan(null, plan, maxStep - plan.step ))
             }
 
-            plans.filter { plan.step  <= maxStep }
+            return plans
         }
     }
 
 
     private fun calcPlan(robot: Robot?, plan: Plan, robotStep: Int): Plan {
+
         val newResource = plan.resource.toMutableMap()
 
         plan.resourceRobot.forEach {
@@ -103,8 +161,15 @@ class Plant {
 
     private fun getRobotStep(robot: Robot, plan: Plan): Int =
         robot.cost.map {
-            if (plan.resource[it.resource]!! > it.count) 1 else 1 + it.count - (plan.resource[it.resource]?:0)
-        }.maxOf {it}
+            if (plan.resource[it.resource]!! >= it.count) 0 else {
+                val fact = it.count - (plan.resource[it.resource] ?: 0)
+                val plan = plan.resourceRobot[it.resource]!!
+                val value = ceil(fact.toDouble() / plan).roundToInt()
+                value
+
+            }
+        }.maxOf { it }
+
 
 
     private fun checkRobot(robot: Robot, plan: Plan): Boolean =
